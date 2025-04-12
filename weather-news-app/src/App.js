@@ -3,12 +3,14 @@ import React, { useState } from "react";
 import LocationForm from "./components/LocationForm";
 import CurrentWeather from "./components/CurrentWeather";
 import HourlyForecast from "./components/HourlyForecast";
+import DailyForecast from "./components/DailyForecast";
 
 export default function App() {
    const [searchTerm, setSearchTerm] = useState("");
    const [coordinates, setCoordinates] = useState({ lat: null, lon: null });
    const [weatherData, setWeatherData] = useState(null);
    const [hourlyData, setHourlyData] = useState(null);
+   const [dailyData, setDailyData] = useState(null);
 
    // Access API key from the .env file
    const API_KEY = process.env.REACT_APP_OPENWEATHER_API_KEY;
@@ -32,6 +34,7 @@ export default function App() {
 
             await fetchWeatherData(lat, lon);
             await fetchHourlyForecast(lat, lon);
+            await fetchDailyForecast(lat, lon);
          } else {
             console.error("No location found. Please try another search.");
          }
@@ -68,6 +71,20 @@ export default function App() {
       }
    };
 
+   // Function to fetch the daily forecast
+   const fetchDailyForecast = async (lat, lon) => {
+      try {
+         const dailyUrl = `https://api.openweathermap.org/data/2.5/forecast/daily?lat=${lat}&lon=${lon}&cnt=7&appid=${API_KEY}&units=imperial`;
+         const response = await fetch(dailyUrl);
+         const data = await response.json();
+
+         setDailyData(data);
+         console.log("Daily Forecast Data:", data);
+      } catch (error) {
+         console.error("Error fetching daily forecast data:", error);
+      }
+   };
+
    return (
       <div>
          <h1>My Weather App</h1>
@@ -86,7 +103,9 @@ export default function App() {
 
          {weatherData && <CurrentWeather current={weatherData.main} />}
 
-         {hourlyData && hourlyData.list && <HourlyForecast hourly={hourlyData.list} />}
+         {hourlyData && <HourlyForecast hourly={hourlyData.list} />}
+
+         <DailyForecast daily={dailyData} />
       </div>
    );
 }
