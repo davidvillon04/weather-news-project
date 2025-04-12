@@ -84,7 +84,7 @@ export default function App() {
             </div>
          )}
 
-         {weatherData && weatherData.main && <CurrentWeather current={weatherData} />}
+         {weatherData && <CurrentWeather current={weatherData.main} />}
 
          {hourlyData && hourlyData.list && <HourlyForecast hourly={hourlyData.list} />}
       </div>
