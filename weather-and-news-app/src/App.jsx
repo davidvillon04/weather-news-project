@@ -78,6 +78,25 @@ export default function App() {
       }
    }, [coordinates, API_KEY]);
 
+   // Function to handle current location retrieval using HTML Geolocation API
+   const handleCurrentLocation = () => {
+      if (navigator.geolocation) {
+         navigator.geolocation.getCurrentPosition(
+            (position) => {
+               const lat = position.coords.latitude;
+               const lon = position.coords.longitude;
+               setCoordinates({ lat, lon });
+               console.log("Current location coordinates:", lat, lon);
+            },
+            (error) => {
+               console.error("Error retrieving current location:", error);
+            }
+         );
+      } else {
+         alert("Geolocation is not supported by your browser.");
+      }
+   };
+
    return (
       <div>
          <h1>My Weather App</h1>
@@ -86,6 +105,8 @@ export default function App() {
             setSearchTerm={setSearchTerm}
             handleSearch={handleSearch}
          />
+         <button onClick={handleCurrentLocation}>Use Current Location</button>
+
          {loading && <p>Loading data...</p>}
          {coordinates.lat && coordinates.lon && (
             <div>
