@@ -57,7 +57,6 @@ export default function App() {
    // Function to fetch the hourly forecast
    const fetchHourlyForecast = async (lat, lon) => {
       try {
-         // Pro endpoint for hourly forecast
          const hourlyUrl = `https://pro.openweathermap.org/data/2.5/forecast/hourly?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=imperial`;
          const response = await fetch(hourlyUrl);
          const data = await response.json();
