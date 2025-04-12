@@ -1,4 +1,3 @@
-// src/components/HourlyForecast.jsx
 import React from "react";
 
 const HourlyForecast = ({ hourly }) => {
