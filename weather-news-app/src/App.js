@@ -1,9 +1,14 @@
+import LocationForm from "./components/LocationForm";
+import CurrentWeather from "./components/CurrentWeather";
+import HourlyForecast from "./components/HourlyForecast";
+
 import React, { useState } from "react";
 
 export default function App() {
    const [searchTerm, setSearchTerm] = useState("");
    const [coordinates, setCoordinates] = useState({ lat: null, lon: null });
    const [weatherData, setWeatherData] = useState(null);
+   const [hourlyData, setHourlyData] = useState(null);
 
    // Access API key from the .env file
    const API_KEY = process.env.REACT_APP_OPENWEATHER_API_KEY;
@@ -26,6 +31,7 @@ export default function App() {
             console.log("Coordinates:", lat, lon);
 
             await fetchWeatherData(lat, lon);
+            await fetchHourlyForecast(lat, lon);
          } else {
             console.error("No location found. Please try another search.");
          }
@@ -48,18 +54,29 @@ export default function App() {
       }
    };
 
+   // Function to fetch the hourly forecast
+   const fetchHourlyForecast = async (lat, lon) => {
+      try {
+         // Pro endpoint for hourly forecast
+         const hourlyUrl = `https://pro.openweathermap.org/data/2.5/forecast/hourly?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=imperial`;
+         const response = await fetch(hourlyUrl);
+         const data = await response.json();
+
+         setHourlyData(data);
+         console.log("Hourly Forecast Data:", data);
+      } catch (error) {
+         console.error("Error fetching hourly forecast data:", error);
+      }
+   };
+
    return (
       <div>
          <h1>My Weather App</h1>
-         <form onSubmit={handleSearch}>
-            <input
-               type="text"
-               placeholder="Enter city, ZIP, or address..."
-               value={searchTerm}
-               onChange={(e) => setSearchTerm(e.target.value)}
-            />
-            <button type="submit">Search</button>
-         </form>
+         <LocationForm
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            handleSearch={handleSearch}
+         />
 
          {coordinates.lat && coordinates.lon && (
             <div>
@@ -68,14 +85,9 @@ export default function App() {
             </div>
          )}
 
-         {weatherData && (
-            <div>
-               <h2>Current Weather</h2>
-               <p>Temperature: {weatherData.main.temp} °F</p>
-               <p>Humidity: {weatherData.main.humidity}%</p>
-               <p>Conditions: {weatherData.weather && weatherData.weather[0].description}</p>
-            </div>
-         )}
+         {weatherData && weatherData.main && <CurrentWeather current={weatherData} />}
+
+         {hourlyData && hourlyData.list && <HourlyForecast hourly={hourlyData.list} />}
       </div>
    );
 }
