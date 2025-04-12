@@ -1,8 +1,8 @@
+import React, { useState } from "react";
+
 import LocationForm from "./components/LocationForm";
 import CurrentWeather from "./components/CurrentWeather";
 import HourlyForecast from "./components/HourlyForecast";
-
-import React, { useState } from "react";
 
 export default function App() {
    const [searchTerm, setSearchTerm] = useState("");
