@@ -8,9 +8,12 @@ import DailyForecast from "./components/DailyForecast";
 export default function App() {
    const [searchTerm, setSearchTerm] = useState("");
    const [coordinates, setCoordinates] = useState({ lat: null, lon: null });
+
    const [weatherData, setWeatherData] = useState(null);
    const [hourlyData, setHourlyData] = useState(null);
    const [dailyData, setDailyData] = useState(null);
+
+   const [loading, setLoading] = useState(false);
 
    // Access API key from the .env file
    const API_KEY = import.meta.env.VITE_REACT_APP_OPENWEATHER_API_KEY;
@@ -41,34 +44,36 @@ export default function App() {
 
    // useEffect to fetch weather data whenever the coordinates change.
    useEffect(() => {
+      const fetchData = async () => {
+         setLoading(true);
+         try {
+            // Fetch current weather data
+            const weatherUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${coordinates.lat}&lon=${coordinates.lon}&appid=${API_KEY}&units=imperial`;
+            const weatherResponse = await fetch(weatherUrl);
+            const weatherJson = await weatherResponse.json();
+            setWeatherData(weatherJson);
+            console.log("Weather Data:", weatherJson);
+
+            // Fetch hourly forecast
+            const hourlyUrl = `https://pro.openweathermap.org/data/2.5/forecast/hourly?lat=${coordinates.lat}&lon=${coordinates.lon}&appid=${API_KEY}&units=imperial`;
+            const hourlyResponse = await fetch(hourlyUrl);
+            const hourlyJson = await hourlyResponse.json();
+            setHourlyData(hourlyJson);
+            console.log("Hourly Forecast Data:", hourlyJson);
+
+            // Fetch daily forecast
+            const dailyUrl = `https://api.openweathermap.org/data/2.5/forecast/daily?lat=${coordinates.lat}&lon=${coordinates.lon}&cnt=7&appid=${API_KEY}&units=imperial`;
+            const dailyResponse = await fetch(dailyUrl);
+            const dailyJson = await dailyResponse.json();
+            setDailyData(dailyJson);
+            console.log("Daily Forecast Data:", dailyJson);
+         } catch (error) {
+            console.error("Error fetching weather data:", error);
+         } finally {
+            setLoading(false);
+         }
+      };
       if (coordinates.lat && coordinates.lon) {
-         const fetchData = async () => {
-            try {
-               // Fetch current weather data
-               const weatherUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${coordinates.lat}&lon=${coordinates.lon}&appid=${API_KEY}&units=imperial`;
-               const weatherResponse = await fetch(weatherUrl);
-               const weatherJson = await weatherResponse.json();
-               setWeatherData(weatherJson);
-               console.log("Weather Data:", weatherJson);
-
-               // Fetch hourly forecast
-               const hourlyUrl = `https://pro.openweathermap.org/data/2.5/forecast/hourly?lat=${coordinates.lat}&lon=${coordinates.lon}&appid=${API_KEY}&units=imperial`;
-               const hourlyResponse = await fetch(hourlyUrl);
-               const hourlyJson = await hourlyResponse.json();
-               setHourlyData(hourlyJson);
-               console.log("Hourly Forecast Data:", hourlyJson);
-
-               // Fetch daily forecast
-               const dailyUrl = `https://api.openweathermap.org/data/2.5/forecast/daily?lat=${coordinates.lat}&lon=${coordinates.lon}&cnt=7&appid=${API_KEY}&units=imperial`;
-               const dailyResponse = await fetch(dailyUrl);
-               const dailyJson = await dailyResponse.json();
-               setDailyData(dailyJson);
-               console.log("Daily Forecast Data:", dailyJson);
-            } catch (error) {
-               console.error("Error fetching weather data:", error);
-            }
-         };
-
          fetchData();
       }
    }, [coordinates, API_KEY]);
@@ -81,7 +86,7 @@ export default function App() {
             setSearchTerm={setSearchTerm}
             handleSearch={handleSearch}
          />
-
+         {loading && <p>Loading data...</p>}
          {coordinates.lat && coordinates.lon && (
             <div>
                <p>Latitude: {coordinates.lat}</p>
