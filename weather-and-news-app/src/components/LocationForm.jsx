@@ -1,6 +1,6 @@
 import React from "react";
 
-const LocationForm = ({ searchTerm, setSearchTerm, handleSearch }) => {
+export default function LocationForm({ searchTerm, setSearchTerm, handleSearch }) {
    return (
       <form onSubmit={handleSearch}>
          <input
@@ -12,6 +12,4 @@ const LocationForm = ({ searchTerm, setSearchTerm, handleSearch }) => {
          <button type="submit">Search</button>
       </form>
    );
-};
-
-export default LocationForm;
+}
