@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Container, Box, Typography, CircularProgress, Button } from "@mui/material";
+import { CssBaseline, Container, Box, Typography, CircularProgress, Button } from "@mui/material";
 
 import LocationForm from "./components/LocationForm";
 import CurrentWeather from "./components/CurrentWeather";
@@ -132,94 +132,107 @@ export default function App() {
    };
 
    return (
-      <Container maxWidth="xl">
-         <Box display="flex" flexDirection="column" alignItems="center" sx={{ py: 4 }}>
-            <Typography variant="h3" gutterBottom>
-               Villon's Weather App
-            </Typography>
+      <>
+         <CssBaseline />
 
-            <LocationForm
-               searchTerm={searchTerm}
-               setSearchTerm={setSearchTerm}
-               handleSearch={handleSearch}
-            />
-
-            <Button variant="outlined" sx={{ mt: 2 }} onClick={handleCurrentLocation}>
-               Use Current Location
-            </Button>
-
-            {loading && <CircularProgress sx={{ mt: 3 }} />}
-
-            {/* SHOW LOCATION NAME AND COORDS */}
-            {coordinates.lat && coordinates.lon && (
-               <Box textAlign="center" mt={3}>
-                  <Typography variant="h5">{locationName}</Typography>
-
-                  <Typography variant="caption" color="textSecondary">
-                     Lat: {coordinates.lat.toFixed(4)}, Lon: {coordinates.lon.toFixed(4)}
+         {/* Full-page gradient */}
+         <Box
+            sx={{
+               color: "#fff",
+               minHeight: "100vh",
+               background: "linear-gradient(to bottom,rgb(59, 81, 104), #4ca1af)",
+            }}
+         >
+            <Container maxWidth="xl" disableGutters>
+               <Box display="flex" flexDirection="column" alignItems="center" sx={{ py: 4 }}>
+                  <Typography variant="h3" gutterBottom fontFamily={"cursive"}>
+                     Today's Climate & Current
                   </Typography>
-               </Box>
-            )}
 
-            {/* CURRENT WEATHER */}
-            <Box display="flex" justifyContent="center" width="100%" mt={4}>
-               <CurrentWeather current={weatherData} />
-            </Box>
+                  <LocationForm
+                     searchTerm={searchTerm}
+                     setSearchTerm={setSearchTerm}
+                     handleSearch={handleSearch}
+                  />
 
-            {/* HOURLY FORECAST */}
-            {hourlyData && (
-               <Box
-                  width="100%"
-                  mt={4}
-                  sx={{
-                     backgroundColor: "rgba(0, 0, 0, 0.44)",
-                     borderRadius: 5,
-                     p: 3,
-                  }}
-               >
-                  <HourlyForecast hourly={hourlyData.list} />
-               </Box>
-            )}
+                  <Button variant="contained" sx={{ mt: 2 }} onClick={handleCurrentLocation}>
+                     Use Current Location
+                  </Button>
 
-            {/* 7-DAY FORECAST */}
-            {dailyData && (
-               <Box
-                  width="100%"
-                  mt={4}
-                  sx={{
-                     backgroundColor: "rgba(0, 0, 0, 0.44)",
-                     borderRadius: 5,
-                     p: 3,
-                  }}
-               >
-                  <DailyForecast daily={dailyData} />
-               </Box>
-            )}
+                  {loading && <CircularProgress sx={{ mt: 3 }} />}
 
-            {/* NEWS */}
-            <Box
-               width="100%"
-               mt={1}
-               sx={{
-                  backgroundColor: "rgba(0, 0, 0, 0.44)",
-                  borderRadius: 5,
-                  p: 3,
-               }}
-            >
-               <Typography variant="h4" align="center" gutterBottom sx={{ color: "#fff" }}>
-                  Top New York Times Stories
-               </Typography>
-               <NewsList articles={showAll ? newsData : newsData.slice(0, 5)} />
+                  {/* SHOW LOCATION NAME AND COORDS */}
+                  {coordinates.lat && coordinates.lon && (
+                     <Box textAlign="center" mt={3}>
+                        <Typography variant="h5">{locationName}</Typography>
 
-               {newsData.length > 5 && (
-                  <Box textAlign="center" mt={2}>
-                     <Button variant="contained" onClick={() => setShowAll(!showAll)}>
-                        {showAll ? "Show Less" : "Show More"}
-                     </Button>
+                        <Typography variant="caption" color="black" fontSize={15}>
+                           Lat: {coordinates.lat.toFixed(4)}, Lon: {coordinates.lon.toFixed(4)}
+                        </Typography>
+                     </Box>
+                  )}
+
+                  {/* CURRENT WEATHER */}
+                  <Box display="flex" justifyContent="center" width="100%" mt={4}>
+                     <CurrentWeather current={weatherData} />
                   </Box>
-               )}
-            </Box>
+
+                  {/* HOURLY FORECAST */}
+                  {hourlyData && (
+                     <Box
+                        width="100%"
+                        mt={4}
+                        sx={{
+                           backgroundColor: "rgba(0, 0, 0, 0.44)",
+                           borderRadius: 5,
+                           p: 3,
+                        }}
+                     >
+                        <HourlyForecast hourly={hourlyData.list} />
+                     </Box>
+                  )}
+
+                  {/* 7-DAY FORECAST */}
+                  {dailyData && (
+                     <Box
+                        width="100%"
+                        mt={4}
+                        sx={{
+                           backgroundColor: "rgba(0, 0, 0, 0.44)",
+                           borderRadius: 5,
+                           p: 3,
+                        }}
+                     >
+                        <DailyForecast daily={dailyData} />
+                     </Box>
+                  )}
+
+                  {/* NEWS */}
+                  <Box
+                     width="100%"
+                     mt={4}
+                     sx={{
+                        backgroundColor: "rgba(0, 0, 0, 0.44)",
+                        borderRadius: 5,
+                        p: 3,
+                     }}
+                  >
+                     <Typography variant="h4" align="center" gutterBottom sx={{ color: "#fff" }}>
+                        Top New York Times Stories
+                     </Typography>
+                     <NewsList articles={showAll ? newsData : newsData.slice(0, 5)} />
+
+                     {newsData.length > 5 && (
+                        <Box textAlign="center" mt={2}>
+                           <Button variant="contained" onClick={() => setShowAll(!showAll)}>
+                              {showAll ? "Show Less" : "Show More"}
+                           </Button>
+                        </Box>
+                     )}
+                  </Box>
+               </Box>
+            </Container>
          </Box>
-      </Container>
+      </>
    );
 }
