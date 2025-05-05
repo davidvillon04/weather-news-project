@@ -21,7 +21,7 @@ const DailyForecast = ({ daily }) => {
                      </p>
                      {iconUrl && <img src={iconUrl} alt={day.weather[0].description} />}
                      <p>
-                        Min: {day.temp.min} °F, Max: {day.temp.max} °F
+                        Min: {day.temp.min} °F<br></br>Max: {day.temp.max} °F
                      </p>
                      <p>Conditions: {day.weather[0].description}</p>
                   </div>

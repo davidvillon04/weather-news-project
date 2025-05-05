@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
+import { Container, Box, Typography, CircularProgress, Button } from "@mui/material";
 
 import LocationForm from "./components/LocationForm";
 import CurrentWeather from "./components/CurrentWeather";
 import HourlyForecast from "./components/HourlyForecast";
 import DailyForecast from "./components/DailyForecast";
+import NewsList from "./components/NewsList";
 
 export default function App() {
    const [searchTerm, setSearchTerm] = useState("");
@@ -15,8 +17,27 @@ export default function App() {
 
    const [loading, setLoading] = useState(false);
 
-   // Access API key from the .env file
-   const API_KEY = import.meta.env.VITE_REACT_APP_OPENWEATHER_API_KEY;
+   const [newsData, setNewsData] = useState([]);
+   const [showAll, setShowAll] = useState(false);
+
+   // Access API keys from the .env file
+   const WEATHER_KEY = import.meta.env.VITE_REACT_APP_OPENWEATHER_API_KEY;
+   const NYT_KEY = import.meta.env.VITE_NYT_API_KEY;
+
+   useEffect(() => {
+      async function fetchNews() {
+         try {
+            const res = await fetch(
+               `https://api.nytimes.com/svc/mostpopular/v2/viewed/1.json?api-key=${NYT_KEY}`
+            );
+            const json = await res.json();
+            setNewsData(json.results); // All 20 stories
+         } catch (err) {
+            console.error("Error fetching NYT stories:", err);
+         }
+      }
+      fetchNews();
+   }, [NYT_KEY]);
 
    // Function to handle the search submission
    const handleSearch = async (event) => {
@@ -25,7 +46,7 @@ export default function App() {
 
       try {
          // Build the API URL with the search term and API key
-         const url = `https://api.openweathermap.org/geo/1.0/direct?q=${searchTerm}&limit=1&appid=${API_KEY}`;
+         const url = `https://api.openweathermap.org/geo/1.0/direct?q=${searchTerm}&limit=1&appid=${WEATHER_KEY}`;
          const response = await fetch(url);
          const data = await response.json();
 
@@ -48,21 +69,21 @@ export default function App() {
          setLoading(true);
          try {
             // Fetch current weather data
-            const weatherUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${coordinates.lat}&lon=${coordinates.lon}&appid=${API_KEY}&units=imperial`;
+            const weatherUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${coordinates.lat}&lon=${coordinates.lon}&appid=${WEATHER_KEY}&units=imperial`;
             const weatherResponse = await fetch(weatherUrl);
             const weatherJson = await weatherResponse.json();
             setWeatherData(weatherJson);
             console.log("Weather Data:", weatherJson);
 
             // Fetch hourly forecast
-            const hourlyUrl = `https://pro.openweathermap.org/data/2.5/forecast/hourly?lat=${coordinates.lat}&lon=${coordinates.lon}&appid=${API_KEY}&units=imperial`;
+            const hourlyUrl = `https://pro.openweathermap.org/data/2.5/forecast/hourly?lat=${coordinates.lat}&lon=${coordinates.lon}&appid=${WEATHER_KEY}&units=imperial`;
             const hourlyResponse = await fetch(hourlyUrl);
             const hourlyJson = await hourlyResponse.json();
             setHourlyData(hourlyJson);
             console.log("Hourly Forecast Data:", hourlyJson);
 
             // Fetch daily forecast
-            const dailyUrl = `https://api.openweathermap.org/data/2.5/forecast/daily?lat=${coordinates.lat}&lon=${coordinates.lon}&cnt=7&appid=${API_KEY}&units=imperial`;
+            const dailyUrl = `https://api.openweathermap.org/data/2.5/forecast/daily?lat=${coordinates.lat}&lon=${coordinates.lon}&cnt=7&appid=${WEATHER_KEY}&units=imperial`;
             const dailyResponse = await fetch(dailyUrl);
             const dailyJson = await dailyResponse.json();
             setDailyData(dailyJson);
@@ -76,7 +97,7 @@ export default function App() {
       if (coordinates.lat && coordinates.lon) {
          fetchData();
       }
-   }, [coordinates, API_KEY]);
+   }, [coordinates, WEATHER_KEY]);
 
    // Function to handle current location retrieval using HTML Geolocation API
    const handleCurrentLocation = () => {
@@ -98,28 +119,90 @@ export default function App() {
    };
 
    return (
-      <div>
-         <h1>My Weather App</h1>
-         <LocationForm
-            searchTerm={searchTerm}
-            setSearchTerm={setSearchTerm}
-            handleSearch={handleSearch}
-         />
-         <button onClick={handleCurrentLocation}>Use Current Location</button>
+      <Container maxWidth="xl">
+         <Box display="flex" flexDirection="column" alignItems="center" sx={{ py: 4 }}>
+            <Typography variant="h3" gutterBottom>
+               Villon's Weather App
+            </Typography>
 
-         {loading && <p>Loading data...</p>}
-         {coordinates.lat && coordinates.lon && (
-            <div>
-               <p>Latitude: {coordinates.lat}</p>
-               <p>Longitude: {coordinates.lon}</p>
-            </div>
-         )}
+            <LocationForm
+               searchTerm={searchTerm}
+               setSearchTerm={setSearchTerm}
+               handleSearch={handleSearch}
+            />
 
-         <CurrentWeather current={weatherData} />
+            <Button variant="outlined" sx={{ mt: 2 }} onClick={handleCurrentLocation}>
+               Use Current Location
+            </Button>
 
-         {hourlyData && <HourlyForecast hourly={hourlyData.list} />}
+            {loading && <CircularProgress sx={{ mt: 3 }} />}
 
-         <DailyForecast daily={dailyData} />
-      </div>
+            {coordinates.lat && coordinates.lon && (
+               <Box textAlign="center" mt={3}>
+                  <Typography>Latitude: {coordinates.lat}</Typography>
+                  <Typography>Longitude: {coordinates.lon}</Typography>
+               </Box>
+            )}
+
+            {/* CURRENT WEATHER */}
+            <Box width="100%" mt={4}>
+               <CurrentWeather current={weatherData} />
+            </Box>
+
+            {/* HOURLY FORECAST */}
+            {hourlyData && (
+               <Box
+                  width="100%"
+                  mt={4}
+                  sx={{
+                     backgroundColor: "rgba(0, 0, 0, 0.44)",
+                     borderRadius: 5,
+                     p: 3,
+                  }}
+               >
+                  <HourlyForecast hourly={hourlyData.list} />
+               </Box>
+            )}
+
+            {/* 7-DAY FORECAST */}
+            {dailyData && (
+               <Box
+                  width="100%"
+                  mt={4}
+                  sx={{
+                     backgroundColor: "rgba(0, 0, 0, 0.44)",
+                     borderRadius: 5,
+                     p: 3,
+                  }}
+               >
+                  <DailyForecast daily={dailyData} />
+               </Box>
+            )}
+
+            {/* NEWS */}
+            <Box
+               width="100%"
+               mt={1}
+               sx={{
+                  backgroundColor: "rgba(0, 0, 0, 0.44)",
+                  borderRadius: 5,
+                  p: 3,
+               }}
+            >
+               <Typography variant="h4" align="center" gutterBottom sx={{ color: "#fff" }}>
+                  Top New York Times Stories
+               </Typography>
+               <NewsList articles={showAll ? newsData : newsData.slice(0, 5)} />
+
+               {newsData.length > 5 && (
+                  <Box textAlign="center" mt={2}>
+                     <Button variant="contained" onClick={() => setShowAll(!showAll)}>
+                        {showAll ? "Show Less" : "Show More"}
+                     </Button>
+                  </Box>
+               )}
+            </Box>
+         </Box>
+      </Container>
    );
 }
