@@ -10,6 +10,7 @@ import NewsList from "./components/NewsList";
 export default function App() {
    const [searchTerm, setSearchTerm] = useState("");
    const [coordinates, setCoordinates] = useState({ lat: null, lon: null });
+   const [locationName, setLocationName] = useState("");
 
    const [weatherData, setWeatherData] = useState(null);
    const [hourlyData, setHourlyData] = useState(null);
@@ -52,14 +53,14 @@ export default function App() {
 
          // If data is returned, update the coordinates state
          if (data && data.length > 0) {
-            const { lat, lon } = data[0];
+            const { lat, lon, name, state, country } = data[0];
             setCoordinates({ lat, lon });
-            console.log("Coordinates:", lat, lon);
+            setLocationName([name, state, country].filter(Boolean).join(", "));
          } else {
             console.error("No location found. Please try another search.");
          }
       } catch (error) {
-         console.error("Error fetching geocoding data:", error);
+         console.error(error);
       }
    };
 
@@ -103,11 +104,23 @@ export default function App() {
    const handleCurrentLocation = () => {
       if (navigator.geolocation) {
          navigator.geolocation.getCurrentPosition(
-            (position) => {
+            async (position) => {
                const lat = position.coords.latitude;
                const lon = position.coords.longitude;
                setCoordinates({ lat, lon });
-               console.log("Current location coordinates:", lat, lon);
+
+               try {
+                  const res = await fetch(
+                     `https://api.openweathermap.org/geo/1.0/reverse?lat=${lat}&lon=${lon}&limit=1&appid=${WEATHER_KEY}`
+                  );
+                  const data = await res.json();
+                  if (data && data.length > 0) {
+                     const { name, state, country } = data[0];
+                     setLocationName([name, state, country].filter(Boolean).join(", "));
+                  }
+               } catch (err) {
+                  console.error("Reverse geocoding failed", err);
+               }
             },
             (error) => {
                console.error("Error retrieving current location:", error);
@@ -137,15 +150,19 @@ export default function App() {
 
             {loading && <CircularProgress sx={{ mt: 3 }} />}
 
+            {/* SHOW LOCATION NAME AND COORDS */}
             {coordinates.lat && coordinates.lon && (
                <Box textAlign="center" mt={3}>
-                  <Typography>Latitude: {coordinates.lat}</Typography>
-                  <Typography>Longitude: {coordinates.lon}</Typography>
+                  <Typography variant="h5">{locationName}</Typography>
+
+                  <Typography variant="caption" color="textSecondary">
+                     Lat: {coordinates.lat.toFixed(4)}, Lon: {coordinates.lon.toFixed(4)}
+                  </Typography>
                </Box>
             )}
 
             {/* CURRENT WEATHER */}
-            <Box width="100%" mt={4}>
+            <Box display="flex" justifyContent="center" width="100%" mt={4}>
                <CurrentWeather current={weatherData} />
             </Box>
 

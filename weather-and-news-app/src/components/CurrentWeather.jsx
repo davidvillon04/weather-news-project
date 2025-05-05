@@ -1,4 +1,5 @@
 import React from "react";
+import { Box, Typography } from "@mui/material";
 
 const CurrentWeather = ({ current }) => {
    if (!current) return null;
@@ -7,13 +8,20 @@ const CurrentWeather = ({ current }) => {
    const iconUrl = iconCode ? `https://openweathermap.org/img/wn/${iconCode}@2x.png` : "";
 
    return (
-      <div>
-         <h2>Current Weather</h2>
-         {iconUrl && <img src={iconUrl} alt={current.weather[0].description} />}
-         <p>Temperature: {current.main.temp} °F</p>
-         <p>Humidity: {current.main.humidity}%</p>
-         <p>Conditions: {current.weather && current.weather[0].description}</p>
-      </div>
+      <Box textAlign="center">
+         <Typography variant="h4" gutterBottom>
+            Current Weather
+         </Typography>
+         <Box
+            component="img"
+            src={iconUrl}
+            alt={current.weather[0].description}
+            sx={{ display: "inline-block", mb: 2 }}
+         />
+         <Typography>Temperature: {current.main.temp} °F</Typography>
+         <Typography>Humidity: {current.main.humidity}%</Typography>
+         <Typography>Conditions: {current.weather[0].description}</Typography>
+      </Box>
    );
 };
 
